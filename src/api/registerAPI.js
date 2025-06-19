@@ -1,25 +1,36 @@
 import { users } from "../data/users.js";
+import { IsValid } from "../lib/IsValid.js";
 
 export function registerAPI(req, res) {
-    // is not valid req.body.username
-    if (false) {
-        return res.send('Netinkamas username');
-    }
+    const [err, msg] = IsValid.fields(req.body, {
+        username: 'username',
+        password: 'password',
+    });
 
-    // is not valid req.body.password
-    if (false) {
-        return res.send('Netinkamas password');
+    if (err) {
+        return res.json({
+            status: 'error',
+            msg: msg,
+        });
     }
 
     // tikriname, ar nera dublikatu
     for (const user of users) {
         if (user.username === req.body.username) {
-            return res.send('Sorry, toks username jau uzimtas :(');
+            return res.json({
+                status: 'error',
+                msg: {
+                    username: 'Sorry, toks username jau uzimtas :(',
+                },
+            });
         }
     }
 
     // "registruojame"
-    users.push(req.body);
+    users.push({ id: users.length + 1, ...req.body });
 
-    return res.send('Tu esi, nr:' + users.length);
+    return res.json({
+        status: 'success',
+        msg: 'Tu esi, nr:' + users.length,
+    });
 }
